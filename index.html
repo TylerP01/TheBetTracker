@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BetTrackr AU">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2300ff87'/><text y='.9em' font-size='75' x='12'>🏆</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetTrackr AU — Your Bets, Your Edge</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ── Original BetLedger colour system ── */
+:root {
+  --bg:       #0a0a0f;
+  --bg2:      #111118;
+  --card:     #1a1a24;
+  --card2:    #22222f;
+  --pill:     #2a2a3a;
+  --line:     #2a2a3a;
+  --line2:    #3a3a50;
+  --green:    #00ff87;
+  --green2:   #00cc6a;
+  --green-bg: rgba(0,255,135,.12);
+  --red:      #ff4757;
+  --red-bg:   rgba(255,71,87,.12);
+  --amber:    #ffd32a;
+  --amber-bg: rgba(255,211,42,.12);
+  --blue:     #5352ed;
+  --blue-bg:  rgba(83,82,237,.15);
+  --purple:   #a29bfe;
+  --text:     #e8e8f0;
+  --text2:    #9898b0;
+  --text3:    #5a5a70;
+  --r:        10px;
+  --rs:       7px;
+  --font:     'Syne', sans-serif;
+  --mono:     'JetBrains Mono', monospace;
+  --sh:       0 4px 20px rgba(0,0,0,.5);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 20% 0%, rgba(0,255,135,.04) 0%, transparent 50%);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--pill); border-radius: 3px; }
+
+/* ══════════ LAYOUT ══════════ */
+.shell { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  width: 220px; min-width: 220px;
+  background: var(--bg2);
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; z-index: 10;
+}
+.logo-area {
+  padding: 20px 18px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--green), var(--green2));
+  border-radius: 9px; display: flex; align-items: center;
+  justify-content: center; font-weight: 900; font-size: 18px;
+  color: #fff; flex-shrink: 0;
+  box-shadow: 0 0 18px rgba(0,255,135,.5);
+}
+.logo-name { font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
+.logo-name b { color: var(--green); font-weight: 800; }
+.logo-tag { font-size: 10px; color: var(--text3); letter-spacing: 1.8px; text-transform: uppercase; margin-top: 1px; }
+
+.nav-group-label {
+  padding: 12px 16px 4px;
+  font-size: 9.5px; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--text3); font-weight: 700;
+  margin-top: 4px;
+}
+.nav-link {
+  margin: 1px 8px;
+  padding: 9px 11px;
+  border-radius: var(--rs);
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  color: var(--text2);
+  display: flex; align-items: center; gap: 9px;
+  transition: all .13s; position: relative;
+}
+.nav-link:hover { color: #fff; background: rgba(255,255,255,.06); }
+.nav-link.active {
+  color: #fff; font-weight: 600;
+  background: rgba(0,255,135,.08);
+  border: 1px solid rgba(0,255,135,.18);
+}
+.nav-link.active .icon { color: var(--green); }
+.icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-cnt {
+  margin-left: auto; background: var(--green);
+  color: #000; font-size: 10px; font-weight: 800;
+  padding: 1px 7px; border-radius: 12px; display: none;
+}
+
+.sb-bottom {
+  margin-top: auto;
+  margin: auto 10px 12px;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 14px;
+}
+.sb-bottom-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); margin-bottom: 4px; font-weight: 600; }
+.sb-bottom-val { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--green); }
+.sb-bottom-row { display: flex; gap: 10px; margin-top: 5px; font-size: 11px; color: var(--text3); font-family: var(--mono); }
+
+/* Main */
+.main { flex: 1; min-width: 0; overflow-y: auto; }
+.view { display: none; padding: 26px 28px; }
+.view.active { display: block; }
+
+/* ══════════ PAGE HEADER ══════════ */
+.page-hd {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px; flex-wrap: wrap; gap: 10px;
+}
+.page-title { font-size: 24px; font-weight: 800; letter-spacing: -.5px; }
+.page-title span { color: var(--green); }
+.page-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+.page-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* ══════════ BUTTONS ══════════ */
+.btn {
+  border: none; cursor: pointer; font-family: var(--font);
+  font-weight: 600; font-size: 13px; border-radius: var(--rs);
+  padding: 9px 18px; transition: all .13s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-green { background: var(--green); color: #000; }
+.btn-green:hover { background: var(--green2); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,255,135,.4); }
+.btn-ghost { background: rgba(255,255,255,.07); color: var(--text2); border: 1px solid var(--line2); }
+.btn-ghost:hover { background: rgba(255,255,255,.11); color: #fff; }
+.btn-red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(231,76,60,.3); }
+.btn-red:hover { background: var(--red); color: #fff; }
+.btn-sm { padding: 6px 13px; font-size: 12px; }
+.btn-xs { padding: 4px 9px; font-size: 11px; }
+
+/* ══════════ CARDS ══════════ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--sh);
+}
+.card-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card-title { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); font-weight: 700; }
+
+/* ══════════ STAT WIDGETS ══════════ */
+.widgets { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.widget {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 16px 17px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s, transform .13s;
+}
+.widget:hover { border-color: var(--line2); transform: translateY(-1px); }
+.w-top { height: 2px; position: absolute; top: 0; left: 0; right: 0; }
+.w-top.green { background: var(--green); }
+.w-top.red   { background: var(--red); }
+.w-top.amber { background: var(--amber); }
+.w-top.blue  { background: var(--blue); }
+.w-top.purple{ background: var(--purple); }
+.w-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--text3); font-weight: 700; margin-bottom: 8px; }
+.w-val { font-family: var(--mono); font-size: 22px; font-weight: 500; }
+.w-val.g { color: var(--green); }
+.w-val.r { color: var(--red); }
+.w-val.a { color: var(--amber); }
+.w-sub { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
+.w-ico { position: absolute; right: 14px; top: 14px; font-size: 20px; opacity: .12; }
+
+/* ══════════ FORMS ══════════ */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 13px; }
+.f-group { display: flex; flex-direction: column; gap: 5px; }
+.f-group.full { grid-column: 1 / -1; }
+label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); font-weight: 600; }
+input, select, textarea {
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--line2);
+  border-radius: var(--rs);
+  color: var(--text); font-family: var(--font);
+  font-size: 13.5px; padding: 9px 11px;
+  width: 100%; outline: none;
+  transition: border-color .13s, background .13s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--green);
+  background: rgba(46,204,113,.05);
+}
+input::placeholder { color: var(--text3); }
+select option { background: #1a1a6e; }
+textarea { resize: vertical; min-height: 68px; }
+.f-hint { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.mb { margin-bottom: 13px; }
+
+/* ══════════ TABLES ══════════ */
+.tscroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th {
+  padding: 9px 12px; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text3);
+  border-bottom: 1px solid var(--line);
+  font-weight: 700; white-space: nowrap; text-align: left;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  color: var(--text2); vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.03); color: #fff; }
+.mono { font-family: var(--mono); }
+.g { color: var(--green); }
+.r { color: var(--red); }
+.a { color: var(--amber); }
+
+/* ══════════ BADGES ══════════ */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  transition: all .13s;
+}
+.bwin  { background: var(--green-bg); color: var(--green); border: 1px solid rgba(0,255,135,.3); }
+.bloss { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(255,71,87,.3); }
+.bpend { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(255,211,42,.3); }
+.bpush { background: var(--blue-bg);  color: var(--blue);  border: 1px solid rgba(83,82,237,.3); }
+.bcash { background: rgba(162,155,254,.12); color: var(--purple); border: 1px solid rgba(162,155,254,.3); }
+.bvoid { background: rgba(255,255,255,.05); color: var(--text3); border: 1px solid var(--line); }
+
+/* ══════════ TAG PILL ══════════ */
+.tagpill {
+  display: inline-block; padding: 2px 7px;
+  border-radius: 4px; font-size: 11px; font-weight: 500;
+  background: rgba(0,255,135,.07); color: var(--text2);
+  border: 1px solid rgba(255,255,255,.1); margin: 1px;
+}
+
+/* ══════════ LAYOUT GRIDS ══════════ */
+.two   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.mb16 { margin-bottom: 16px; }
+@media (max-width: 1100px) { .three { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 800px)  { .two, .three { grid-template-columns: 1fr; } }
+
+/* ══════════ CHART CONTAINERS ══════════ */
+.chart-sm { height: 210px; position: relative; }
+.chart-md { height: 270px; position: relative; }
+
+/* ══════════ MODAL ══════════ */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.8); z-index: 900;
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+}
+.overlay.open { display: flex; }
+.modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: 14px; padding: 26px;
+  width: 92%; max-width: 740px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(0,0,0,.7);
+}
+.modal-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-size: 19px; font-weight: 800; }
+.modal-x {
+  width: 30px; height: 30px; border-radius: 7px;
+  background: rgba(255,255,255,.07); border: 1px solid var(--line);
+  color: var(--text2); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-x:hover { background: rgba(255,255,255,.13); color: #fff; }
+.modal-ft { display: flex; gap: 9px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+/* ══════════ FILTER BAR ══════════ */
+.filter-bar { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.filter-bar input, .filter-bar select { max-width: 155px; padding: 7px 10px; font-size: 12.5px; }
+
+/* ══════════ CALENDAR ══════════ */
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cal-arrow {
+  background: rgba(255,255,255,.07); border: 1px solid var(--line2);
+  color: #fff; padding: 5px 14px; border-radius: var(--rs);
+  cursor: pointer; font-size: 16px; font-family: var(--font);
+}
+.cal-arrow:hover { background: rgba(255,255,255,.13); }
+.cal-month-label { font-size: 16px; font-weight: 800; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-head { text-align: center; padding: 7px 0; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3); font-weight: 700; }
+.cal-day {
+  min-height: 72px; background: rgba(255,255,255,.03);
+  border: 1px solid var(--line); border-radius: var(--rs);
+  padding: 7px; cursor: pointer; transition: all .13s;
+}
+.cal-day:hover { border-color: var(--line2); background: rgba(255,255,255,.055); }
+.cal-day.today { border-color: rgba(46,204,113,.45); }
+.cal-day.profit { background: rgba(46,204,113,.06); }
+.cal-day.loss   { background: rgba(231,76,60,.06); }
+.cal-day.faded  { opacity: .22; }
+.cal-dn { font-size: 12px; font-weight: 700; color: var(--text2); }
+.cal-pnl { font-family: var(--mono); font-size: 11px; margin-top: 3px; font-weight: 500; }
+.cal-cnt { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+/* ══════════ SETTINGS CHIPS ══════════ */
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 9px; }
+.chip {
+  background: rgba(255,255,255,.06); border: 1px solid var(--line2);
+  border-radius: var(--rs); padding: 5px 11px;
+  font-size: 13px; display: flex; align-items: center; gap: 7px;
+}
+.chip-x { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; line-height: 1; }
+.chip-x:hover { color: var(--red); }
+.chip-add { display: flex; gap: 7px; }
+.chip-add input { max-width: 200px; }
+.s-title { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); font-weight: 700; margin-bottom: 13px; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+
+/* ══════════ HEALTH BARS ══════════ */
+.hm-item { background: rgba(255,255,255,.04); border-radius: var(--rs); padding: 13px; margin-bottom: 10px; }
+.hm-label { font-size: 10.5px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-weight: 700; }
+.hm-val { font-family: var(--mono); font-size: 19px; }
+.bar-track { height: 5px; background: rgba(255,255,255,.08); border-radius: 3px; margin-top: 7px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+
+/* ══════════ BONUS CARDS ══════════ */
+.bonus-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); gap: 11px; margin-bottom: 14px; }
+.bonus-item {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 14px;
+  display: flex; align-items: center; gap: 13px;
+}
+
+/* ══════════ EMPTY STATE ══════════ */
+.empty-state { text-align: center; padding: 44px 20px; color: var(--text3); }
+.empty-icon { font-size: 36px; margin-bottom: 11px; }
+.empty-msg { font-size: 13px; line-height: 1.6; }
+
+/* ══════════ DIVIDER ROW ══════════ */
+.section-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.section-title { font-size: 14px; font-weight: 700; }
+
+@media (max-width: 768px) {
+  .sidebar { width: 52px; min-width: 52px; }
+  .logo-area > div, .nav-group-label, .nav-link > span:not(.icon), .nav-cnt, .sb-bottom { display: none; }
+  .nav-link { justify-content: center; }
+  .view { padding: 14px; }
+}
+
+/* ═══ SYNC STATUS BAR ═══ */
+.sync-bar { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11px; padding: 5px 12px; border-radius: var(--rs); border: 1px solid var(--line); background: rgba(255,255,255,.03); }
+.sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sdot.ok { background: var(--green); box-shadow: 0 0 6px rgba(0,255,135,.7); }
+.sdot.saving { background: var(--amber); animation: blink 1s infinite; }
+.sdot.err { background: var(--red); }
+.sdot.idle { background: var(--text3); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+</style>
+</head>
+<body>
+
+
+<div id="app-shell" class="shell" style="display:flex">
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<nav class="sidebar">
+  <div class="logo-area">
+    <div class="logo-mark">B</div>
+    <div>
+      <div class="logo-name">Bet<b>Trackr</b></div>
+      <div class="logo-tag">🇦🇺 AU Edition</div>
+    </div>
+  </div>
+
+  <div class="nav-group-label">Main</div>
+  <div class="nav-link active" onclick="nav('dashboard')"><span class="icon">📊</span><span>Dashboard</span></div>
+  <div class="nav-link" onclick="nav('addbet')"><span class="icon">➕</span><span>New Bet</span></div>
+  <div class="nav-link" onclick="nav('bets')"><span class="icon">📋</span><span>All Bets</span><span class="nav-cnt" id="pcnt"></span></div>
+
+  <div class="nav-group-label">Analyse</div>
+  <div class="nav-link" onclick="nav('calendar')"><span class="icon">📅</span><span>Calendar</span></div>
+  <div class="nav-link" onclick="nav('bookmakers')"><span class="icon">🏦</span><span>Bookmakers</span></div>
+  <div class="nav-link" onclick="nav('cappers')"><span class="icon">🎯</span><span>Cappers</span></div>
+  <div class="nav-link" onclick="nav('tags')"><span class="icon">🏷️</span><span>Tags</span></div>
+  <div class="nav-link" onclick="nav('health')"><span class="icon">❤️</span><span>Acct Health</span></div>
+  <div class="nav-link" onclick="nav('bonuses')"><span class="icon">🎁</span><span>Bonuses</span></div>
+
+  <div class="nav-group-label">Config</div>
+  <div class="nav-link" onclick="nav('settings')"><span class="icon">⚙️</span><span>Settings</span></div>
+
+  <div class="sb-bottom" style="margin-top:auto">
+    <div class="sb-bottom-lbl">Current Bankroll</div>
+    <div class="sb-bottom-val" id="sb-val">A$0.00</div>
+    <div class="sb-bottom-row">
+      <span>Unit: <span id="sb-unit">A$0</span></span>
+      <span id="sb-pnl" class="g">+A$0</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════ MAIN CONTENT ════════════════ -->
+<main class="main">
+
+<!-- ── DASHBOARD ── -->
+<div id="view-dashboard" class="view active">
+  <div class="page-hd">
+    <div><div class="page-title">Dashboard <span>Overview</span></div><div class="page-sub">All your bets across all Australian bookmakers.</div></div>
+    <div class="page-actions">
+      <div class="sync-bar">
+        <div class="sdot idle" id="sync-dot"></div>
+        <span id="sync-lbl" class="sync-lbl-el" style="color:var(--text3)">Offline</span>
+        <span style="color:var(--text3)">·</span>
+        <span id="active-pin" style="color:var(--text2);font-size:11px">Offline</span>
+      </div>
+      <button class="btn btn-green" onclick="nav('addbet')">＋ New Bet</button>
+    </div>
+  </div>
+  <div class="widgets" id="d-widgets"></div>
+  <div class="two mb16">
+    <div class="card"><div class="card-hd"><div class="card-title">Cumulative P&amp;L (AUD)</div></div><div class="chart-sm"><canvas id="c-pnl"></canvas></div></div>
+    <div class="card"><div class="card-hd"><div class="card-title">P&amp;L by Bookmaker</div></div><div class="chart-sm"><canvas id="c-bkd"></canvas></div></div>
+  </div>
+  <div class="two mb16">
+    <div class="card"><div class="card-hd"><div class="card-title">P&amp;L by Sport</div></div><div class="chart-sm"><canvas id="c-spd"></canvas></div></div>
+    <div class="card"><div class="card-hd"><div class="card-title">Bet Type Breakdown</div></div><div class="chart-sm"><canvas id="c-tyd"></canvas></div></div>
+  </div>
+  <div class="card mb16"><div class="card-hd"><div class="card-title">Recent Bets</div><button class="btn btn-ghost btn-sm" onclick="nav('bets')">View All →</button></div><div class="tscroll" id="d-recent"></div></div>
+</div>
+
+<!-- ── NEW BET ── -->
+<div id="view-addbet" class="view">
+  <div class="page-hd"><div><div class="page-title">New <span>Bet</span></div><div class="page-sub">Log a wager to your tracker.</div></div></div>
+  <div class="card">
+    <div class="form-grid mb">
+      <div class="f-group"><label>Date</label><input type="date" id="f-date"></div>
+      <div class="f-group"><label>Sport</label><select id="f-sport"></select></div>
+      <div class="f-group"><label>Bet Type</label><select id="f-type"></select></div>
+      <div class="f-group"><label>Bookmaker</label><select id="f-book"></select></div>
+      <div class="f-group"><label>Capper / Tipster</label><select id="f-capper"><option value="">— Own Pick —</option></select></div>
+      <div class="f-group"><label>Tags</label><input type="text" id="f-tags" placeholder="value, fade, arb  (comma-separated)"></div>
+    </div>
+    <div class="f-group full mb"><label>Selection / Description</label><input type="text" id="f-desc" placeholder="e.g. Collingwood to win · Over 185.5 pts · Dusty Anytime Scorer"></div>
+    <div class="form-grid mb">
+      <div class="f-group"><label>Decimal Odds</label><input type="number" id="f-odds" placeholder="1.90" step="0.01" min="1.01" oninput="recalc('f')"><div class="f-hint">e.g. 1.90 · 2.50 · 3.40 · 11.00</div></div>
+      <div class="f-group"><label>Stake (AUD)</label><input type="number" id="f-stake" placeholder="0.00" step="0.01" oninput="stakeChg('f')"></div>
+      <div class="f-group"><label>Units</label><input type="number" id="f-units" placeholder="1.0" step="0.1" oninput="unitsChg('f')"><div class="f-hint" id="f-uhint"></div></div>
+      <div class="f-group"><label>To Win (AUD)</label><input type="number" id="f-towin" readonly style="opacity:.55"></div>
+      <div class="f-group"><label>Est. Return</label><input type="number" id="f-ret" readonly style="opacity:.55"></div>
+      <div class="f-group"><label>Status</label>
+        <select id="f-status">
+          <option value="pending">⏳ Pending</option><option value="win">✅ Win</option>
+          <option value="loss">❌ Loss</option><option value="push">↩️ Push / Refund</option>
+          <option value="cashout">💸 Cash Out</option><option value="void">🚫 Void</option>
+        </select>
+      </div>
+    </div>
+    <div class="f-group mb"><label>Bonus Bet?</label><select id="f-bonus"><option value="">No — Normal Stake</option><option value="SNR">Yes — SNR (Stake Not Returned)</option><option value="SR">Yes — SR (Stake Returned)</option></select></div>
+    <div class="f-group full mb"><label>Notes</label><textarea id="f-notes" placeholder="Reasoning, market info, anything worth remembering…"></textarea></div>
+    <div style="display:flex;gap:9px"><button class="btn btn-green" onclick="saveBet()">Save Bet</button><button class="btn btn-ghost" onclick="clrForm()">Clear</button></div>
+  </div>
+</div>
+
+<!-- ── ALL BETS ── -->
+<div id="view-bets" class="view">
+  <div class="page-hd">
+    <div><div class="page-title">All <span>Bets</span></div><div class="page-sub">Your complete betting ledger.</div></div>
+    <div class="page-actions"><button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Export CSV</button><button class="btn btn-green" onclick="nav('addbet')">＋ New Bet</button></div>
+  </div>
+  <div class="filter-bar">
+    <input type="text" placeholder="🔍 Search…" id="fs-q" oninput="renderBets()" style="max-width:175px">
+    <select id="fs-sport" onchange="renderBets()"><option value="">All Sports</option></select>
+    <select id="fs-type"  onchange="renderBets()"><option value="">All Types</option></select>
+    <select id="fs-book"  onchange="renderBets()"><option value="">All Bookmakers</option></select>
+    <select id="fs-capper"onchange="renderBets()"><option value="">All Cappers</option></select>
+    <select id="fs-status"onchange="renderBets()"><option value="">All Status</option><option value="win">Win</option><option value="loss">Loss</option><option value="pending">Pending</option><option value="push">Push</option><option value="cashout">Cash Out</option><option value="void">Void</option></select>
+    <select id="fs-tag"   onchange="renderBets()"><option value="">All Tags</option></select>
+    <button class="btn btn-ghost btn-sm" onclick="resetF()">Reset</button>
+  </div>
+  <div class="card"><div class="tscroll" id="bets-tbl"></div></div>
+</div>
+
+<!-- ── CALENDAR ── -->
+<div id="view-calendar" class="view">
+  <div class="page-hd"><div><div class="page-title">PNL <span>Calendar</span></div></div></div>
+  <div class="card mb16">
+    <div class="cal-nav"><button class="cal-arrow" onclick="calMv(-1)">‹</button><div class="cal-month-label" id="cal-lbl"></div><button class="cal-arrow" onclick="calMv(1)">›</button></div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+  <div class="two">
+    <div class="card"><div class="card-title" style="margin-bottom:12px">Monthly Summary</div><div id="cal-sum"></div></div>
+    <div class="card"><div class="card-title" style="margin-bottom:12px">Day Detail</div><div id="cal-det"><div class="empty-state"><div class="empty-icon">📅</div><div class="empty-msg">Click a day to view bets</div></div></div></div>
+  </div>
+</div>
+
+<!-- ── BOOKMAKERS ── -->
+<div id="view-bookmakers" class="view">
+  <div class="page-hd"><div><div class="page-title">Bookmaker <span>Analysis</span></div></div></div>
+  <div class="widgets" id="bk-widgets"></div>
+  <div class="two mb16">
+    <div class="card"><div class="card-hd"><div class="card-title">P&amp;L by Bookmaker</div></div><div class="chart-md"><canvas id="c-bk2"></canvas></div></div>
+    <div class="card"><div class="card-hd"><div class="card-title">Win Rate by Bookmaker</div></div><div class="chart-md"><canvas id="c-bkwr"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="card-title">Bookmaker Detail</div><select id="bk-sel" onchange="renderBkDet()" style="max-width:200px;padding:7px 10px;font-size:13px"><option value="">Select bookmaker…</option></select></div>
+    <div class="tscroll" id="bk-det"></div>
+  </div>
+</div>
+
+<!-- ── CAPPERS ── -->
+<div id="view-cappers" class="view">
+  <div class="page-hd"><div><div class="page-title">Capper <span>Analysis</span></div></div></div>
+  <div class="widgets" id="cp-widgets"></div>
+  <div class="card mb16"><div class="card-hd"><div class="card-title">P&amp;L by Capper / Tipster</div></div><div class="chart-md"><canvas id="c-cap"></canvas></div></div>
+  <div class="card">
+    <div class="card-hd"><div class="card-title">Capper Bets</div><select id="cp-sel" onchange="renderCpDet()" style="max-width:220px;padding:7px 10px;font-size:13px"><option value="">Select capper…</option></select></div>
+    <div class="tscroll" id="cp-det"></div>
+  </div>
+</div>
+
+<!-- ── TAGS ── -->
+<div id="view-tags" class="view">
+  <div class="page-hd"><div><div class="page-title">Tag <span>Analysis</span></div></div></div>
+  <div class="card mb16"><div class="card-hd"><div class="card-title">P&amp;L by Tag</div></div><div class="chart-md"><canvas id="c-tag"></canvas></div></div>
+  <div class="card mb16"><div class="card-hd"><div class="card-title">Tag Performance Table</div></div><div class="tscroll" id="tag-tbl"></div></div>
+  <div class="card">
+    <div class="card-hd"><div class="card-title">Bets by Tag</div><select id="tag-sel" onchange="renderTagDet()" style="max-width:220px;padding:7px 10px;font-size:13px"><option value="">Select tag…</option></select></div>
+    <div class="tscroll" id="tag-det"></div>
+  </div>
+</div>
+
+<!-- ── ACCOUNT HEALTH ── -->
+<div id="view-health" class="view">
+  <div class="page-hd"><div><div class="page-title">Account <span>Health</span></div><div class="page-sub">Monitor the metrics that keep your accounts open longer.</div></div></div>
+  <div class="two mb16">
+    <div class="card"><div class="card-title" style="margin-bottom:13px">Health Metrics</div><div id="h-metrics"></div></div>
+    <div class="card"><div class="card-title" style="margin-bottom:13px">Win Rate by Bookmaker</div><div id="h-bkrates"></div></div>
+  </div>
+  <div class="card mb16">
+    <div class="card-hd"><div class="card-title">Mug Bet Tracker</div><div style="font-size:11px;color:var(--text3)">Bets at odds &lt; 1.50</div></div>
+    <div class="tscroll" id="h-mug"></div>
+  </div>
+  <div class="card"><div class="card-hd"><div class="card-title">Monthly Cashflow</div></div><div class="chart-md"><canvas id="c-cash"></canvas></div></div>
+</div>
+
+<!-- ── BONUSES ── -->
+<div id="view-bonuses" class="view">
+  <div class="page-hd">
+    <div><div class="page-title">Bonus <span>Bets</span></div><div class="page-sub">Track SNR/SR balances and expiry dates. Never miss a bonus.</div></div>
+    <button class="btn btn-green btn-sm" onclick="openBonusModal()">＋ Add Bonus</button>
+  </div>
+  <div class="widgets" id="bn-widgets"></div>
+  <div class="bonus-grid" id="bn-list"></div>
+  <div class="card"><div class="card-hd"><div class="card-title">Bonus Bet Performance</div></div><div class="tscroll" id="bn-perf"></div></div>
+</div>
+
+<!-- ── SETTINGS ── -->
+<div id="view-settings" class="view">
+  <div class="page-hd"><div><div class="page-title">Settings <span>&amp; Config</span></div></div></div>
+  <div class="card mb16">
+    <div class="s-title">💰 Bankroll &amp; Units</div>
+    <div class="form-grid mb">
+      <div class="f-group"><label>Starting Bankroll (AUD)</label><input type="number" id="s-bank" step="0.01" placeholder="1000.00" oninput="saveS()"></div>
+      <div class="f-group"><label>Unit Size (AUD)</label><input type="number" id="s-unit" step="0.01" placeholder="10.00" oninput="saveS()"></div>
+      <div class="f-group"><label>Currency Symbol</label><input type="text" id="s-cur" maxlength="4" placeholder="A$" oninput="saveS()"></div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:9px;padding:13px;display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);font-size:13px">
+      <span>Starting: <span id="s-st" class="g">A$0.00</span></span>
+      <span>Current: <span id="s-cu" class="g">A$0.00</span></span>
+      <span>P&amp;L: <span id="s-pnl">A$0.00</span></span>
+      <span>ROI: <span id="s-roi">0.0%</span></span>
+    </div>
+  </div>
+  <div class="card mb16"><div class="s-title">🏆 Sports</div><div class="chip-wrap" id="sp-chips"></div><div class="chip-add"><input type="text" id="n-sp" placeholder="e.g. Esports"><button class="btn btn-green btn-sm" onclick="addItem('sports','n-sp')">Add</button></div></div>
+  <div class="card mb16"><div class="s-title">🎲 Bet Types</div><div class="chip-wrap" id="tp-chips"></div><div class="chip-add"><input type="text" id="n-tp" placeholder="e.g. Correct Score"><button class="btn btn-green btn-sm" onclick="addItem('types','n-tp')">Add</button></div></div>
+  <div class="card mb16"><div class="s-title">🎯 Cappers / Tipsters</div><div class="chip-wrap" id="cp-chips"></div><div class="chip-add"><input type="text" id="n-cp" placeholder="e.g. @SportsTips"><button class="btn btn-green btn-sm" onclick="addItem('cappers','n-cp')">Add</button></div></div>
+  <div class="card mb16"><div class="s-title">📚 Bookmakers</div><div class="chip-wrap" id="bk-chips"></div><div class="chip-add"><input type="text" id="n-bk" placeholder="e.g. BoomBet"><button class="btn btn-green btn-sm" onclick="addItem('books','n-bk')">Add</button></div></div>
+  <div class="card gap">
+    <div class="s-title">🔐 Cloud Sync — Cross-Device</div>
+    <p style="font-size:12px;color:var(--text3);line-height:1.7;margin-bottom:14px">
+      Set a PIN to sync bets between your computer and iPhone. Same PIN = same data on every device. Works on your GitHub Pages URL.
+    </p>
+
+    <div id="sync-panel-off">
+      <div class="fg" style="margin-bottom:12px;max-width:380px">
+        <div class="f-group">
+          <label>Your PIN (4+ characters)</label>
+          <input type="password" id="pin-entry" placeholder="Enter PIN…" maxlength="20"
+            onkeydown="if(event.key==='Enter')doSyncLoginUI()">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-green btn-sm" onclick="doSyncLoginUI()" id="pin-login-btn">🔐 Connect</button>
+        <span style="font-size:11px;color:var(--text3)">New PIN = creates account · Existing PIN = loads your data</span>
+      </div>
+      <div id="pin-err" style="font-size:12px;color:var(--red);margin-top:8px;min-height:16px"></div>
+    </div>
+
+    <div id="sync-panel-on" style="display:none">
+      <div style="background:rgba(0,255,135,.06);border:1px solid rgba(0,255,135,.15);border-radius:var(--rs);padding:14px;margin-bottom:14px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:4px">Syncing as</div>
+        <div style="font-family:var(--mono);font-size:22px;color:var(--green)" id="active-pin-display">●●●●●●●●</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px" id="sync-status-txt">Connected</div>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.7">
+        📱 <strong style="color:var(--text2)">On iPhone:</strong> Open your GitHub Pages URL in Safari → Settings → enter the same PIN → Connect.<br>
+        Your bets will sync automatically on both devices.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-green btn-sm" onclick="forcePush()">↑ Sync Now</button>
+        <button class="btn bh sm" onclick="disconnectSync()">Disconnect</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card"><div class="s-title" style="color:var(--red)">⚠️ Danger Zone</div><button class="btn btn-red" onclick="clearAll()">Clear All Data</button><span style="font-size:12px;color:var(--text3);margin-left:11px">Permanently deletes all bets, bonuses and settings.</span></div>
+</div>
+
+</main>
+</div>
+
+<!-- EDIT BET MODAL -->
+<div class="overlay" id="ov-edit">
+  <div class="modal-box">
+    <div class="modal-hd"><div class="modal-title">Edit Bet</div><button class="modal-x" onclick="closeEdit()">×</button></div>
+    <div class="form-grid mb">
+      <div class="f-group"><label>Date</label><input type="date" id="e-date"></div>
+      <div class="f-group"><label>Sport</label><select id="e-sport"></select></div>
+      <div class="f-group"><label>Bet Type</label><select id="e-type"></select></div>
+      <div class="f-group"><label>Bookmaker</label><select id="e-book"></select></div>
+      <div class="f-group"><label>Capper</label><select id="e-capper"><option value="">— Own Pick —</option></select></div>
+      <div class="f-group"><label>Status</label><select id="e-status"><option value="pending">⏳ Pending</option><option value="win">✅ Win</option><option value="loss">❌ Loss</option><option value="push">↩️ Push</option><option value="cashout">💸 Cash Out</option><option value="void">🚫 Void</option></select></div>
+    </div>
+    <div class="f-group full mb"><label>Selection</label><input type="text" id="e-desc"></div>
+    <div class="form-grid mb">
+      <div class="f-group"><label>Decimal Odds</label><input type="number" id="e-odds" step="0.01" min="1.01" oninput="recalc('e')"></div>
+      <div class="f-group"><label>Stake (AUD)</label><input type="number" id="e-stake" step="0.01" oninput="stakeChg('e')"></div>
+      <div class="f-group"><label>Units</label><input type="number" id="e-units" step="0.1" oninput="unitsChg('e')"></div>
+      <div class="f-group"><label>To Win (AUD)</label><input type="number" id="e-towin" readonly style="opacity:.55"></div>
+      <div class="f-group"><label>Tags</label><input type="text" id="e-tags"></div>
+      <div class="f-group"><label>Bonus Bet</label><select id="e-bonus"><option value="">No</option><option value="SNR">SNR</option><option value="SR">SR</option></select></div>
+    </div>
+    <div class="f-group full"><label>Notes</label><textarea id="e-notes"></textarea></div>
+    <div class="modal-ft"><button class="btn btn-red btn-sm" onclick="delBet()">Delete</button><button class="btn btn-ghost" onclick="closeEdit()">Cancel</button><button class="btn btn-green" onclick="saveEdit()">Save Changes</button></div>
+  </div>
+</div>
+
+<!-- ADD BONUS MODAL -->
+<div class="overlay" id="ov-bonus">
+  <div class="modal-box" style="max-width:470px">
+    <div class="modal-hd"><div class="modal-title">Add Bonus Bet</div><button class="modal-x" onclick="closeBonusModal()">×</button></div>
+    <div class="form-grid mb">
+      <div class="f-group"><label>Bookmaker</label><select id="b-book"></select></div>
+      <div class="f-group"><label>Type</label><select id="b-type"><option value="SNR">SNR (Stake Not Returned)</option><option value="SR">SR (Stake Returned)</option><option value="FreeBet">Free Bet</option><option value="Promo">Promo / Other</option></select></div>
+      <div class="f-group"><label>Amount (AUD)</label><input type="number" id="b-amt" step="0.01" placeholder="0.00"></div>
+      <div class="f-group"><label>Expiry Date</label><input type="date" id="b-exp"></div>
+      <div class="f-group full"><label>Notes</label><input type="text" id="b-notes" placeholder="Any conditions…"></div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-ghost" onclick="closeBonusModal()">Cancel</button><button class="btn btn-green" onclick="saveBonus()">Save Bonus</button></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+const KEY = 'bettrackr_au_v5';
+let S = {
+  bets: [], bonuses: [],
+  settings: {
+    bankroll: 1000, unit: 10, currency: 'A$',
+    sports: ['AFL','NRL','A-League','NBL','Cricket (BBL)','Cricket (Int\'l)','Tennis','Horse Racing','Greyhounds','Harness Racing','Rugby Union','Boxing / MMA','Golf','F1','NFL','NBA','MLB','Soccer (Int\'l)'],
+    types:  ['Head to Head','Line / Spread','Total (O/U)','Multi','Same Game Multi','First Try Scorer','Anytime Try Scorer','Top Goalscorer','Race Winner','Each Way','Prop','Futures / Outright','Live Bet','Alt Line'],
+    cappers: [],
+    books: ['Sportsbet','TAB','Neds','Ladbrokes','Pointsbet','Unibet','BlueBet','TopSport','Palmerbet','Bet365','BetEasy','BoomBet','Betfair','Tab.com.au']
+  }
+};
+let editId = null, calY, calM;
+const CH = {};
+
+// ════════════════════════════════════════
+// SYNC — JSONBin.io (PIN-based, real CORS)
+// Works from GitHub Pages or any https URL
+// ════════════════════════════════════════
+const JBKEY = '$2a$10$mWpCHKjNFNI2dJf2qHPFjOCPSaab7BRqf9vvQHDcBE8Z5Iy5jFKSW';
+const JBURL = 'https://api.jsonbin.io/v3';
+let syncTimeout = null;
+let userBinId = null;  // the JSONBin bin ID for this user
+
+function setSyncStatus(s) {
+  document.querySelectorAll('.sdot').forEach(el => el.className = 'sdot ' + s);
+  document.querySelectorAll('.sync-lbl-el').forEach(el => {
+    el.textContent = {idle:'Local only', saving:'Saving…', ok:'Synced ✓', err:'Sync error'}[s] || s;
+  });
+}
+
+// Simple hash so raw PINs never leave the device
+function hashPin(pin) {
+  let h = 2166136261;
+  for (let i = 0; i < pin.length; i++) { h ^= pin.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return 'bt_' + h.toString(36).padStart(8, '0');
+}
+
+// localStorage helpers for PIN→binId map
+function getPinMap() { try { return JSON.parse(localStorage.getItem('btau_pinmap') || '{}'); } catch(e) { return {}; } }
+function setPinMap(m) { localStorage.setItem('btau_pinmap', JSON.stringify(m)); }
+
+async function jbCreate(data) {
+  const r = await fetch(`${JBURL}/b`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JBKEY,
+      'X-Bin-Private': 'false',
+      'X-Bin-Name': 'BetTrackrAU'
+    },
+    body: JSON.stringify({ pin_hash: null, data })
+  });
+  if (!r.ok) throw new Error('create failed: ' + r.status);
+  const j = await r.json();
+  return j.metadata.id;
+}
+
+async function jbRead(binId) {
+  const r = await fetch(`${JBURL}/b/${binId}/latest`, {
+    headers: { 'X-Master-Key': JBKEY }
+  });
+  if (!r.ok) return null;
+  const j = await r.json();
+  return j.record;
+}
+
+async function jbWrite(binId, data) {
+  const r = await fetch(`${JBURL}/b/${binId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JBKEY },
+    body: JSON.stringify(data)
+  });
+  return r.ok;
+}
+
+// Search existing bins for a matching PIN hash
+async function jbFindPin(pinHash) {
+  const r = await fetch(`${JBURL}/b?metadata=true&private=false`, {
+    headers: { 'X-Master-Key': JBKEY }
+  });
+  if (!r.ok) return null;
+  const j = await r.json();
+  const bins = j || [];
+  // Check each bin for matching pin_hash
+  for (const bin of bins.slice(0, 50)) {
+    try {
+      const rec = await jbRead(bin.record?.id || bin.id);
+      if (rec && rec.pin_hash === pinHash) return bin.record?.id || bin.id;
+    } catch(e) {}
+  }
+  return null;
+}
+
+async function cloudPush() {
+  if (!userBinId) return;
+  setSyncStatus('saving');
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(async () => {
+    try {
+      const pinHash = localStorage.getItem('btau_pinhash') || '';
+      const ok = await jbWrite(userBinId, { pin_hash: pinHash, ...S });
+      localStorage.setItem(KEY, JSON.stringify(S));
+      setSyncStatus(ok ? 'ok' : 'err');
+    } catch(e) { setSyncStatus('err'); }
+  }, 900);
+}
+
+function sv() {
+  localStorage.setItem(KEY, JSON.stringify(S));
+  if (userBinId) cloudPush();
+}
+
+function ld() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (!d) return;
+    S.bets = d.bets || []; S.bonuses = d.bonuses || [];
+    if (d.settings) S.settings = { ...S.settings, ...d.settings };
+  } catch(e) {}
+}
+
+// Main login function — called from UI
+async function doSyncLogin(pin) {
+  if (!pin || pin.length < 4) throw new Error('PIN must be at least 4 characters');
+  const ph = hashPin(pin);
+  const map = getPinMap();
+
+  // Check if we already know the bin for this PIN
+  if (map[ph]) {
+    userBinId = map[ph];
+    localStorage.setItem('btau_pinhash', ph);
+    const rec = await jbRead(userBinId);
+    if (rec) {
+      S.bets = rec.bets || []; S.bonuses = rec.bonuses || [];
+      if (rec.settings) S.settings = { ...S.settings, ...rec.settings };
+      localStorage.setItem(KEY, JSON.stringify(S));
+    }
+    return { existed: true };
+  }
+
+  // Try to find existing bin in JSONBin matching this PIN hash
+  // (for when user logs in on a new device)
+  const existingBinId = await jbFindPin(ph);
+  if (existingBinId) {
+    userBinId = existingBinId;
+    map[ph] = existingBinId;
+    setPinMap(map);
+    localStorage.setItem('btau_pinhash', ph);
+    const rec = await jbRead(userBinId);
+    if (rec) {
+      S.bets = rec.bets || []; S.bonuses = rec.bonuses || [];
+      if (rec.settings) S.settings = { ...S.settings, ...rec.settings };
+      localStorage.setItem(KEY, JSON.stringify(S));
+    }
+    return { existed: true };
+  }
+
+  // New PIN — create a fresh bin
+  const binId = await jbCreate({ pin_hash: ph, ...S });
+  userBinId = binId;
+  map[ph] = binId;
+  setPinMap(map);
+  localStorage.setItem('btau_pinhash', ph);
+  return { existed: false };
+}
+
+async function forcePush() {
+  if (!userBinId) { alert('Not connected — enter your PIN first'); return; }
+  setSyncStatus('saving');
+  const ph = localStorage.getItem('btau_pinhash') || '';
+  const ok = await jbWrite(userBinId, { pin_hash: ph, ...S });
+  setSyncStatus(ok ? 'ok' : 'err');
+}
+
+function disconnectSync() {
+  if (!confirm('Disconnect sync? Your local bets stay intact.')) return;
+  userBinId = null;
+  localStorage.removeItem('btau_pinhash');
+  setSyncStatus('idle');
+  updateSyncPanel(false);
+}
+
+function updateSyncPanel(connected) {
+  const on = document.getElementById('sync-panel-on');
+  const off = document.getElementById('sync-panel-off');
+  if (on) on.style.display = connected ? 'block' : 'none';
+  if (off) off.style.display = connected ? 'none' : 'block';
+}
+
+// ════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════
+function init() {
+  ld();
+  const now = new Date(); calY = now.getFullYear(); calM = now.getMonth();
+  document.getElementById('f-date').value = now.toISOString().split('T')[0];
+  popAll(); renderAll(); applyS();
+  document.getElementById('f-uhint').textContent = `1u = ${S.settings.currency}${S.settings.unit}`;
+  // Auto-reconnect if we have a saved pin hash + bin map
+  const ph = localStorage.getItem('btau_pinhash');
+  const map = getPinMap();
+  if (ph && map[ph]) {
+    userBinId = map[ph];
+    setSyncStatus('saving');
+    updateSyncPanel(true);
+    jbRead(userBinId).then(rec => {
+      if (rec) {
+        S.bets = rec.bets||[]; S.bonuses = rec.bonuses||[];
+        if (rec.settings) S.settings = {...S.settings,...rec.settings};
+        localStorage.setItem(KEY, JSON.stringify(S));
+        renderAll(); applyS();
+      }
+      setSyncStatus('ok');
+    }).catch(() => setSyncStatus('err'));
+  } else {
+    setSyncStatus('idle');
+    updateSyncPanel(false);
+  }
+}
+
+// ════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════
+function nav(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n => {
+    if ((n.getAttribute('onclick') || '').includes("'" + id + "'")) n.classList.add('active');
+  });
+  if (id === 'dashboard')  renderDash();
+  if (id === 'bets')       renderBets();
+  if (id === 'calendar')   renderCal();
+  if (id === 'bookmakers') renderBk();
+  if (id === 'cappers')    renderCp();
+  if (id === 'tags')       renderTags();
+  if (id === 'health')     renderHealth();
+  if (id === 'bonuses')    renderBonuses();
+  if (id === 'settings')   { applyS(); renderChips(); }
+}
+
+// ════════════════════════════════════════
+// SELECTS
+// ════════════════════════════════════════
+function fillSel(id, items, blank) {
+  const el = document.getElementById(id); if (!el) return;
+  const cur = el.value; el.innerHTML = '';
+  if (blank) { const o = document.createElement('option'); o.value = ''; o.textContent = blank; el.appendChild(o); }
+  items.forEach(v => { const o = document.createElement('option'); o.value = o.textContent = v; el.appendChild(o); });
+  if (cur && [...el.options].some(o => o.value === cur)) el.value = cur;
+}
+function fillCap(id) {
+  const el = document.getElementById(id); if (!el) return;
+  const cur = el.value; el.innerHTML = '<option value="">— Own Pick —</option>';
+  S.settings.cappers.forEach(c => { const o = document.createElement('option'); o.value = o.textContent = c; el.appendChild(o); });
+  if (cur) el.value = cur;
+}
+function popAll() {
+  ['f-sport','e-sport'].forEach(id => fillSel(id, S.settings.sports));
+  ['f-type', 'e-type' ].forEach(id => fillSel(id, S.settings.types));
+  ['f-book', 'e-book','b-book'].forEach(id => fillSel(id, S.settings.books));
+  ['f-capper','e-capper'].forEach(id => fillCap(id));
+  fillSel('fs-sport', S.settings.sports, 'All Sports');
+  fillSel('fs-type',  S.settings.types,  'All Types');
+  fillSel('fs-book',  S.settings.books,  'All Bookmakers');
+  const fc = document.getElementById('fs-capper');
+  if (fc) { fc.innerHTML = '<option value="">All Cappers</option><option value="__s">Own Picks</option>'; S.settings.cappers.forEach(c => { const o = document.createElement('option'); o.value = o.textContent = c; fc.appendChild(o); }); }
+  const tags = getTags();
+  const ft = document.getElementById('fs-tag');
+  if (ft) { ft.innerHTML = '<option value="">All Tags</option>'; tags.forEach(t => { const o = document.createElement('option'); o.value = o.textContent = t; ft.appendChild(o); }); }
+  fill2('bk-sel', S.settings.books, 'Select bookmaker…');
+  fill2('cp-sel', S.settings.cappers, 'Select capper…');
+  fill2('tag-sel', tags, 'Select tag…');
+}
+function fill2(id, items, ph) {
+  const el = document.getElementById(id); if (!el) return;
+  el.innerHTML = `<option value="">${ph}</option>`;
+  items.forEach(v => { const o = document.createElement('option'); o.value = o.textContent = v; el.appendChild(o); });
+}
+function getTags() { const s = new Set(); S.bets.forEach(b => (b.tags||[]).forEach(t => s.add(t))); return [...s].sort(); }
+
+// ════════════════════════════════════════
+// CALC
+// ════════════════════════════════════════
+function toWin(odds, stake) {
+  const o = parseFloat(odds), s = parseFloat(stake);
+  return (!o || !s || o < 1.01) ? 0 : (o - 1) * s;
+}
+function recalc(p) {
+  const o = parseFloat(document.getElementById(p+'-odds').value);
+  const s = parseFloat(document.getElementById(p+'-stake').value);
+  const t = toWin(o, s);
+  const te = document.getElementById(p+'-towin'); if (te) te.value = t ? t.toFixed(2) : '';
+  const re = document.getElementById(p+'-ret');   if (re) re.value = t ? (t + s).toFixed(2) : '';
+}
+function stakeChg(p) {
+  const s = parseFloat(document.getElementById(p+'-stake').value), u = S.settings.unit || 1;
+  const ue = document.getElementById(p+'-units'); if (ue && !isNaN(s)) ue.value = (s/u).toFixed(2);
+  recalc(p);
+}
+function unitsChg(p) {
+  const u2 = parseFloat(document.getElementById(p+'-units').value), u = S.settings.unit || 1;
+  const se = document.getElementById(p+'-stake'); if (se && !isNaN(u2)) se.value = (u2*u).toFixed(2);
+  recalc(p);
+}
+function calcPNL(b) {
+  if (b.status === 'win')     return b.towin || 0;
+  if (b.status === 'loss')    return -(b.stake || 0);
+  if (b.status === 'push' || b.status === 'void') return 0;
+  if (b.status === 'cashout') return (b.cashout_return || 0) - (b.stake || 0);
+  return null;
+}
+
+// ════════════════════════════════════════
+// SAVE BET
+// ════════════════════════════════════════
+function saveBet() {
+  const desc = document.getElementById('f-desc').value.trim();
+  if (!desc) { alert('Please enter a selection.'); return; }
+  const odds = parseFloat(document.getElementById('f-odds').value) || 0;
+  const stake = parseFloat(document.getElementById('f-stake').value) || 0;
+  const units = parseFloat(document.getElementById('f-units').value) || (stake / (S.settings.unit || 1));
+  const tw = toWin(odds, stake);
+  const b = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    date: document.getElementById('f-date').value,
+    sport: document.getElementById('f-sport').value,
+    type: document.getElementById('f-type').value,
+    book: document.getElementById('f-book').value,
+    capper: document.getElementById('f-capper').value,
+    desc, odds, stake, units, towin: tw,
+    status: document.getElementById('f-status').value,
+    tags: document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+    bonus: document.getElementById('f-bonus').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    pnl: null
+  };
+  b.pnl = calcPNL(b);
+  S.bets.unshift(b); sv(); renderAll(); clrForm(); nav('bets');
+}
+function clrForm() {
+  ['f-desc','f-odds','f-stake','f-units','f-towin','f-ret','f-notes','f-tags'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('f-status').value = 'pending';
+  document.getElementById('f-bonus').value = '';
+}
+
+// ════════════════════════════════════════
+// RENDER ALL
+// ════════════════════════════════════════
+function renderAll() { popAll(); renderDash(); renderBets(); renderBonuses(); updateSB(); updBadge(); }
+function updateSB() {
+  const cur = S.settings.currency || 'A$', bank = S.settings.bankroll || 0;
+  const p = S.bets.filter(b => b.pnl !== null).reduce((a, b) => a + (b.pnl || 0), 0);
+  document.getElementById('sb-val').textContent = cur + (bank + p).toFixed(2);
+  document.getElementById('sb-unit').textContent = cur + (S.settings.unit || 0).toFixed(2);
+  const pe = document.getElementById('sb-pnl');
+  pe.textContent = (p >= 0 ? '+' : '') + cur + Math.abs(p).toFixed(2);
+  pe.className = p >= 0 ? 'g' : 'r';
+}
+function updBadge() {
+  const n = S.bets.filter(b => b.status === 'pending').length;
+  const el = document.getElementById('pcnt');
+  if (el) { el.textContent = n; el.style.display = n ? '' : 'none'; }
+}
+
+// ════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════
+function renderDash() {
+  const bets = S.bets, cur = S.settings.currency || 'A$', bank = S.settings.bankroll || 0;
+  const settled = bets.filter(b => b.pnl !== null);
+  const wins = bets.filter(b => b.status === 'win'), losses = bets.filter(b => b.status === 'loss');
+  const pend = bets.filter(b => b.status === 'pending');
+  const p = settled.reduce((a, b) => a + (b.pnl || 0), 0);
+  const staked = settled.filter(b => b.status !== 'push' && b.status !== 'void').reduce((a, b) => a + (b.stake || 0), 0);
+  const roi = staked ? (p / staked * 100) : 0;
+  const wr = settled.length ? (wins.length / settled.length * 100) : 0;
+  const avg = settled.length ? settled.reduce((a, b) => a + (b.odds || 0), 0) / settled.length : 0;
+
+  document.getElementById('d-widgets').innerHTML = `
+    <div class="widget"><div class="w-top green"></div><div class="w-ico">💰</div><div class="w-lbl">Total P&L</div><div class="w-val ${p>=0?'g':'r'}">${p>=0?'+':''}${cur}${Math.abs(p).toFixed(2)}</div><div class="w-sub">${p>=0?'+':''}${roi.toFixed(2)}% ROI</div></div>
+    <div class="widget"><div class="w-top blue"></div><div class="w-ico">🏦</div><div class="w-lbl">Bankroll</div><div class="w-val ${(bank+p)>=bank?'g':'r'}">${cur}${(bank+p).toFixed(2)}</div><div class="w-sub">Started ${cur}${bank.toFixed(2)}</div></div>
+    <div class="widget"><div class="w-top green"></div><div class="w-ico">✅</div><div class="w-lbl">Win Rate</div><div class="w-val ${wr>=50?'g':''}">${wr.toFixed(1)}%</div><div class="w-sub">${wins.length}W — ${losses.length}L — ${bets.filter(b=>b.status==='push').length}P</div></div>
+    <div class="widget"><div class="w-top amber"></div><div class="w-ico">⏳</div><div class="w-lbl">Pending</div><div class="w-val a">${pend.length}</div><div class="w-sub">${cur}${pend.reduce((a,b)=>a+(b.stake||0),0).toFixed(2)} at risk</div></div>
+    <div class="widget"><div class="w-top purple"></div><div class="w-ico">📊</div><div class="w-lbl">Avg Odds</div><div class="w-val">${avg.toFixed(2)}</div><div class="w-sub">${settled.length} settled bets</div></div>
+    <div class="widget"><div class="w-top red"></div><div class="w-ico">💸</div><div class="w-lbl">Turnover</div><div class="w-val">${cur}${staked.toFixed(0)}</div><div class="w-sub">${bets.length} total bets</div></div>
+  `;
+  renderPNLChart(); renderDCharts();
+  document.getElementById('d-recent').innerHTML = betTbl(S.bets.slice(0, 8), true);
+}
+
+// ════════════════════════════════════════
+// CHARTS
+// ════════════════════════════════════════
+const CD = () => ({
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#5a5a70', font: { family: 'Roboto Mono', size: 11 }, boxWidth: 10 } } },
+  scales: {
+    x: { ticks: { color: '#5a5a70', font: { family: 'Roboto Mono', size: 10 } }, grid: { color: '#1a1a24' } },
+    y: { ticks: { color: '#5a5a70', font: { family: 'Roboto Mono', size: 10 } }, grid: { color: '#1a1a24' } }
+  }
+});
+function dc(k) { if (CH[k]) { CH[k].destroy(); delete CH[k]; } }
+function renderPNLChart() {
+  dc('pnl'); const ctx = document.getElementById('c-pnl'); if (!ctx) return;
+  const sorted = [...S.bets].filter(b => b.pnl !== null).sort((a, b) => a.date.localeCompare(b.date));
+  let cum = 0; const lb = [], da = [];
+  sorted.forEach(b => { cum += b.pnl || 0; lb.push(b.date); da.push(parseFloat(cum.toFixed(2))); });
+  if (!lb.length) { lb.push(''); da.push(0); }
+  const last = da[da.length-1] || 0;
+  CH.pnl = new Chart(ctx, {
+    type: 'line',
+    data: { labels: lb, datasets: [{ label: 'Cumulative P&L', data: da, borderColor: last >= 0 ? '#00ff87' : '#ff4757', backgroundColor: last >= 0 ? 'rgba(0,255,135,.08)' : 'rgba(231,76,60,.1)', fill: true, tension: .35, pointRadius: 2, borderWidth: 2 }] },
+    options: { ...CD(), plugins: { legend: { display: false } } }
+  });
+}
+function barC(cid, key, labels, data, colors) {
+  dc(key); const ctx = document.getElementById(cid); if (!ctx) return;
+  CH[key] = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ data, backgroundColor: colors || data.map(v => v >= 0 ? 'rgba(0,255,135,.75)' : 'rgba(255,71,87,.75)'), borderRadius: 5, borderWidth: 0 }] }, options: { ...CD(), plugins: { legend: { display: false } } } });
+}
+function doughC(cid, key, labels, data) {
+  dc(key); const ctx = document.getElementById(cid); if (!ctx) return;
+  const pal = ['#00ff87','#5352ed','#ff4757','#ffd32a','#a29bfe','#00b894','#fd79a8','#74b9ff','#e17055'];
+  CH[key] = new Chart(ctx, { type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: pal, borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { labels: { color: '#5a5a70', font: { family: 'Roboto Mono', size: 11 }, boxWidth: 10 } } } } });
+}
+function renderDCharts() {
+  const settled = S.bets.filter(b => b.pnl !== null);
+  const bkM = {}; settled.forEach(b => { if (!bkM[b.book]) bkM[b.book] = 0; bkM[b.book] += b.pnl || 0; });
+  barC('c-bkd', 'dBk', Object.keys(bkM), Object.values(bkM).map(v => parseFloat(v.toFixed(2))));
+  const spM = {}; settled.forEach(b => { if (!spM[b.sport]) spM[b.sport] = 0; spM[b.sport] += b.pnl || 0; });
+  barC('c-spd', 'dSp', Object.keys(spM), Object.values(spM).map(v => parseFloat(v.toFixed(2))));
+  const tM = {}; S.bets.forEach(b => { tM[b.type] = (tM[b.type] || 0) + 1; });
+  doughC('c-tyd', 'dTy', Object.keys(tM), Object.values(tM));
+}
+
+// ════════════════════════════════════════
+// BETS TABLE
+// ════════════════════════════════════════
+function getFilt() {
+  const q = (document.getElementById('fs-q').value || '').toLowerCase();
+  const sp = document.getElementById('fs-sport').value, tp = document.getElementById('fs-type').value;
+  const bk = document.getElementById('fs-book').value, cp = document.getElementById('fs-capper').value;
+  const st = document.getElementById('fs-status').value, tg = document.getElementById('fs-tag').value;
+  return S.bets.filter(b => {
+    if (sp && b.sport !== sp) return false;
+    if (tp && b.type  !== tp) return false;
+    if (bk && b.book  !== bk) return false;
+    if (cp === '__s' && b.capper) return false;
+    if (cp && cp !== '__s' && b.capper !== cp) return false;
+    if (st && b.status !== st) return false;
+    if (tg && !(b.tags||[]).includes(tg)) return false;
+    if (q && !`${b.desc} ${b.sport} ${b.type} ${b.book} ${b.capper} ${b.notes}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function renderBets() { document.getElementById('bets-tbl').innerHTML = betTbl(getFilt(), false); }
+function resetF() { ['fs-q','fs-sport','fs-type','fs-book','fs-capper','fs-status','fs-tag'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); renderBets(); }
+
+function slbl(s) { return { win:'✅ Win', loss:'❌ Loss', pending:'⏳ Pending', push:'↩️ Push', cashout:'💸 Cash Out', void:'🚫 Void' }[s] || s; }
+function scls(s) { return { win:'bwin', loss:'bloss', pending:'bpend', push:'bpush', cashout:'bcash', void:'bvoid' }[s] || 'bvoid'; }
+
+function betTbl(bets, mini) {
+  const cur = S.settings.currency || 'A$';
+  if (!bets.length) return '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-msg">No bets found</div></div>';
+  const cols = mini
+    ? ['Date','Selection','Sport','Odds','Stake','P&L','Status']
+    : ['Date','Selection','Sport','Type','Book','Odds','Stake','Units','To Win','P&L','Capper','Tags','Bonus','Status',''];
+  let h = `<table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+  bets.forEach(b => {
+    const p = b.pnl;
+    const ps = p === null ? `<span style="color:var(--text3)">—</span>` : `<span class="mono ${p>0?'g':p<0?'r':'a'}">${p>=0?'+':''}${cur}${Math.abs(p).toFixed(2)}</span>`;
+    const badge = `<span class="badge ${scls(b.status)}" onclick="cycleS('${b.id}')" title="Click to cycle status">${slbl(b.status)}</span>`;
+    const tags = (b.tags||[]).map(t => `<span class="tagpill">${t}</span>`).join('');
+    if (mini) {
+      h += `<tr>
+        <td class="mono" style="font-size:11px;color:var(--text3)">${b.date}</td>
+        <td style="max-width:175px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.desc}</td>
+        <td>${b.sport}</td>
+        <td class="mono">${parseFloat(b.odds||0).toFixed(2)}</td>
+        <td class="mono">${cur}${(b.stake||0).toFixed(2)}</td>
+        <td>${ps}</td><td>${badge}</td></tr>`;
+    } else {
+      h += `<tr>
+        <td class="mono" style="font-size:11px;color:var(--text3);white-space:nowrap">${b.date}</td>
+        <td style="max-width:185px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${b.desc}">${b.desc}${b.notes?`<div style="font-size:10px;color:var(--text3);margin-top:1px;white-space:normal">${b.notes}</div>`:''}</td>
+        <td style="white-space:nowrap">${b.sport}</td>
+        <td style="white-space:nowrap">${b.type}</td>
+        <td style="white-space:nowrap;color:var(--text2)">${b.book||'—'}</td>
+        <td class="mono">${parseFloat(b.odds||0).toFixed(2)}</td>
+        <td class="mono">${cur}${(b.stake||0).toFixed(2)}</td>
+        <td class="mono">${(b.units||0).toFixed(2)}u</td>
+        <td class="mono">${cur}${(b.towin||0).toFixed(2)}</td>
+        <td>${ps}</td>
+        <td style="font-size:12px;color:var(--green)">${b.capper||'<span style="color:var(--text3)">Self</span>'}</td>
+        <td>${tags||'<span style="color:var(--text3)">—</span>'}</td>
+        <td>${b.bonus?`<span class="badge bpush">${b.bonus}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+        <td>${badge}</td>
+        <td><button class="btn btn-ghost btn-xs" onclick="openEdit('${b.id}')">Edit</button></td>
+      </tr>`;
+    }
+  });
+  return h + '</tbody></table>';
+}
+function cycleS(id) {
+  const b = S.bets.find(x => x.id === id); if (!b) return;
+  const o = ['pending','win','loss','push','cashout','void'];
+  b.status = o[(o.indexOf(b.status) + 1) % o.length]; b.pnl = calcPNL(b);
+  sv(); renderAll();
+}
+
+// ════════════════════════════════════════
+// EDIT MODAL
+// ════════════════════════════════════════
+function openEdit(id) {
+  const b = S.bets.find(x => x.id === id); if (!b) return; editId = id;
+  ['e-sport','e-type','e-book'].forEach((el, i) => fillSel(el, S.settings[['sports','types','books'][i]]));
+  fillCap('e-capper');
+  ['date','sport','type','book','capper','status','desc','odds','stake','units','towin','bonus','notes'].forEach(k => {
+    const el = document.getElementById('e-' + k); if (!el) return; el.value = b[k] || '';
+  });
+  document.getElementById('e-tags').value = (b.tags||[]).join(', ');
+  document.getElementById('ov-edit').classList.add('open');
+}
+function closeEdit() { document.getElementById('ov-edit').classList.remove('open'); editId = null; }
+function saveEdit() {
+  const b = S.bets.find(x => x.id === editId); if (!b) return;
+  const odds = parseFloat(document.getElementById('e-odds').value) || 0;
+  const stake = parseFloat(document.getElementById('e-stake').value) || 0;
+  b.date=document.getElementById('e-date').value; b.sport=document.getElementById('e-sport').value;
+  b.type=document.getElementById('e-type').value; b.book=document.getElementById('e-book').value;
+  b.capper=document.getElementById('e-capper').value; b.status=document.getElementById('e-status').value;
+  b.desc=document.getElementById('e-desc').value; b.odds=odds; b.stake=stake;
+  b.units=parseFloat(document.getElementById('e-units').value)||(stake/(S.settings.unit||1));
+  b.towin=toWin(odds,stake); b.tags=document.getElementById('e-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  b.bonus=document.getElementById('e-bonus').value; b.notes=document.getElementById('e-notes').value;
+  b.pnl=calcPNL(b); sv(); closeEdit(); renderAll();
+}
+function delBet() { if(!confirm('Delete this bet?')) return; S.bets=S.bets.filter(x=>x.id!==editId); sv(); closeEdit(); renderAll(); }
+document.getElementById('ov-edit').addEventListener('click', e => { if (e.target.id === 'ov-edit') closeEdit(); });
+
+// ════════════════════════════════════════
+// CALENDAR
+// ════════════════════════════════════════
+function renderCal() {
+  const lbl = new Date(calY, calM).toLocaleString('en-AU', {month:'long',year:'numeric'});
+  document.getElementById('cal-lbl').textContent = lbl;
+  const first = new Date(calY,calM,1).getDay(), days = new Date(calY,calM+1,0).getDate();
+  const prev = new Date(calY,calM,0).getDate(), cur = S.settings.currency||'A$', today = new Date();
+  const dm = {};
+  S.bets.forEach(b => {
+    const pre = `${calY}-${String(calM+1).padStart(2,'0')}`;
+    if (b.date && b.date.startsWith(pre) && b.pnl !== null) {
+      const d = parseInt(b.date.split('-')[2]);
+      if (!dm[d]) dm[d] = {pnl:0,cnt:0};
+      dm[d].pnl += b.pnl; dm[d].cnt++;
+    }
+  });
+  let h = '';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => h += `<div class="cal-head">${d}</div>`);
+  for (let i = 0; i < first; i++) h += `<div class="cal-day faded"><div class="cal-dn">${prev-first+1+i}</div></div>`;
+  for (let d = 1; d <= days; d++) {
+    const isT = today.getFullYear()===calY && today.getMonth()===calM && today.getDate()===d;
+    const ds = dm[d];
+    const date = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cls = ds ? (ds.pnl >= 0 ? 'profit' : 'loss') : '';
+    h += `<div class="cal-day ${cls}${isT?' today':''}" onclick="showDay('${date}')">
+      <div class="cal-dn" style="${isT?'color:var(--green)':''}">${d}</div>
+      ${ds ? `<div class="cal-pnl ${ds.pnl>=0?'g':'r'}">${ds.pnl>=0?'+':''}${cur}${Math.abs(ds.pnl).toFixed(0)}</div><div class="cal-cnt">${ds.cnt} bet${ds.cnt!==1?'s':''}</div>` : ''}
+    </div>`;
+  }
+  const rem = (7 - (first + days) % 7) % 7;
+  for (let d = 1; d <= rem; d++) h += `<div class="cal-day faded"><div class="cal-dn">${d}</div></div>`;
+  document.getElementById('cal-grid').innerHTML = h;
+  renderCalSum();
+}
+function calMv(d) { calM += d; if (calM < 0) { calM = 11; calY--; } if (calM > 11) { calM = 0; calY++; } renderCal(); }
+function kv(k, v) { return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)"><span style="font-size:12px;color:var(--text3)">${k}</span>${v}</div>`; }
+function renderCalSum() {
+  const pre = `${calY}-${String(calM+1).padStart(2,'0')}`;
+  const mb = S.bets.filter(b => b.date && b.date.startsWith(pre));
+  const settled = mb.filter(b => b.pnl !== null);
+  const p = settled.reduce((a,b) => a+(b.pnl||0), 0);
+  const wins = mb.filter(b=>b.status==='win').length, losses = mb.filter(b=>b.status==='loss').length;
+  const staked = settled.filter(b=>b.status!=='push'&&b.status!=='void').reduce((a,b)=>a+(b.stake||0),0);
+  const roi = staked ? (p/staked*100) : 0; const cur = S.settings.currency||'A$';
+  document.getElementById('cal-sum').innerHTML = `
+    ${kv('P&L', `<span class="mono ${p>=0?'g':'r'}">${p>=0?'+':''}${cur}${Math.abs(p).toFixed(2)}</span>`)}
+    ${kv('ROI', `<span class="mono ${roi>=0?'g':'r'}">${roi.toFixed(2)}%</span>`)}
+    ${kv('Record', `<span class="mono">${wins}W — ${losses}L</span>`)}
+    ${kv('Bets', `<span class="mono">${mb.length}</span>`)}
+    ${kv('Turnover', `<span class="mono">${cur}${staked.toFixed(2)}</span>`)}
+    ${kv('Pending', `<span class="mono a">${mb.filter(b=>b.status==='pending').length}</span>`)}
+  `;
+}
+function showDay(date) {
+  const db = S.bets.filter(b => b.date === date);
+  document.getElementById('cal-det').innerHTML = db.length
+    ? `<div style="font-size:10px;color:var(--text3);margin-bottom:8px">${date}</div>` + betTbl(db, true)
+    : '<div class="empty-state" style="padding:16px"><div class="empty-icon">📅</div><div class="empty-msg">No bets on this day</div></div>';
+}
+
+// ════════════════════════════════════════
+// BOOKMAKERS
+// ════════════════════════════════════════
+function renderBk() {
+  const cur = S.settings.currency||'A$';
+  const bkM = {}; S.settings.books.forEach(b => bkM[b] = {pnl:0,w:0,l:0,stake:0,bets:0});
+  S.bets.forEach(b => {
+    if (!bkM[b.book]) bkM[b.book] = {pnl:0,w:0,l:0,stake:0,bets:0};
+    bkM[b.book].bets++; bkM[b.book].stake += b.stake||0;
+    if (b.pnl !== null) bkM[b.book].pnl += b.pnl;
+    if (b.status==='win') bkM[b.book].w++; if (b.status==='loss') bkM[b.book].l++;
+  });
+  const active = Object.entries(bkM).filter(([,d]) => d.bets > 0);
+  const totP = active.reduce((a,[,d]) => a+d.pnl, 0);
+  const best = [...active].sort((a,b) => b[1].pnl - a[1].pnl)[0];
+  document.getElementById('bk-widgets').innerHTML = `
+    <div class="widget"><div class="w-top green"></div><div class="w-ico">🏦</div><div class="w-lbl">Active Books</div><div class="w-val">${active.length}</div><div class="w-sub">of ${S.settings.books.length} tracked</div></div>
+    <div class="widget"><div class="w-top blue"></div><div class="w-ico">💰</div><div class="w-lbl">Total P&L</div><div class="w-val ${totP>=0?'g':'r'}">${totP>=0?'+':''}${cur}${Math.abs(totP).toFixed(2)}</div></div>
+    ${best?`<div class="widget"><div class="w-top purple"></div><div class="w-ico">⭐</div><div class="w-lbl">Best Book</div><div class="w-val" style="font-size:15px">${best[0]}</div><div class="w-sub">${cur}${best[1].pnl.toFixed(2)}</div></div>`:''}
+  `;
+  const lb = active.map(([k])=>k), pl = active.map(([,d])=>parseFloat(d.pnl.toFixed(2)));
+  const wr = active.map(([,d]) => (d.w+d.l)?(d.w/(d.w+d.l)*100):0);
+  barC('c-bk2','bk2',lb,pl); barC('c-bkwr','bkwr',lb,wr.map(v=>parseFloat(v.toFixed(1))),wr.map(()=>'rgba(83,82,237,.75)'));
+  fill2('bk-sel', S.settings.books, 'Select bookmaker…');
+}
+function renderBkDet() { const bk=document.getElementById('bk-sel').value; document.getElementById('bk-det').innerHTML=bk?betTbl(S.bets.filter(b=>b.book===bk),false):''; }
+
+// ════════════════════════════════════════
+// CAPPERS
+// ════════════════════════════════════════
+function renderCp() {
+  const cur = S.settings.currency||'A$';
+  const capM = {'Self (Own Picks)':{pnl:0,w:0,l:0,stake:0,bets:0}};
+  S.settings.cappers.forEach(c => capM[c] = {pnl:0,w:0,l:0,stake:0,bets:0});
+  S.bets.forEach(b => {
+    const k = b.capper||'Self (Own Picks)'; if (!capM[k]) capM[k]={pnl:0,w:0,l:0,stake:0,bets:0};
+    capM[k].bets++; capM[k].stake+=b.stake||0; if (b.pnl!==null) capM[k].pnl+=b.pnl;
+    if (b.status==='win') capM[k].w++; if (b.status==='loss') capM[k].l++;
+  });
+  const active = Object.entries(capM).filter(([,d]) => d.bets > 0);
+  document.getElementById('cp-widgets').innerHTML = active.map(([c,d]) => {
+    const wr=(d.w+d.l)?(d.w/(d.w+d.l)*100):0, roi=d.stake?(d.pnl/d.stake*100):0;
+    return `<div class="widget"><div class="w-top ${d.pnl>=0?'green':'red'}"></div><div class="w-lbl">${c}</div><div class="w-val ${d.pnl>=0?'g':'r'}">${d.pnl>=0?'+':''}${cur}${Math.abs(d.pnl).toFixed(2)}</div><div class="w-sub">${wr.toFixed(1)}% WR · ${roi.toFixed(1)}% ROI · ${d.bets}b</div></div>`;
+  }).join('');
+  const lb=active.map(([k])=>k), pl=active.map(([,d])=>parseFloat(d.pnl.toFixed(2)));
+  barC('c-cap','capBar',lb,pl);
+  fill2('cp-sel', S.settings.cappers, 'Select capper…');
+}
+function renderCpDet() { const c=document.getElementById('cp-sel').value; document.getElementById('cp-det').innerHTML=c?betTbl(S.bets.filter(b=>b.capper===c),false):''; }
+
+// ════════════════════════════════════════
+// TAGS
+// ════════════════════════════════════════
+function renderTags() {
+  const cur=S.settings.currency||'A$', tags=getTags();
+  if (!tags.length) { ['tag-tbl','tag-det'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="empty-state"><div class="empty-icon">🏷️</div><div class="empty-msg">No tags yet. Add tags when logging bets.</div></div>';}); return; }
+  const tM={}; tags.forEach(t=>tM[t]={pnl:0,w:0,l:0,stake:0,bets:0});
+  S.bets.forEach(b=>(b.tags||[]).forEach(t=>{if(!tM[t])tM[t]={pnl:0,w:0,l:0,stake:0,bets:0};tM[t].bets++;tM[t].stake+=b.stake||0;if(b.pnl!==null)tM[t].pnl+=b.pnl;if(b.status==='win')tM[t].w++;if(b.status==='loss')tM[t].l++;}));
+  barC('c-tag','tagBar',Object.keys(tM),Object.values(tM).map(d=>parseFloat(d.pnl.toFixed(2))));
+  let th=`<table><thead><tr><th>Tag</th><th>Bets</th><th>W</th><th>L</th><th>Win%</th><th>P&L</th><th>ROI</th><th>Turnover</th></tr></thead><tbody>`;
+  Object.entries(tM).sort((a,b)=>b[1].pnl-a[1].pnl).forEach(([t,d])=>{
+    const wr=(d.w+d.l)?(d.w/(d.w+d.l)*100).toFixed(1):'—';
+    const roi=d.stake?(d.pnl/d.stake*100).toFixed(2):'—';
+    th+=`<tr><td><span class="tagpill">${t}</span></td><td class="mono">${d.bets}</td><td class="mono g">${d.w}</td><td class="mono r">${d.l}</td><td class="mono">${wr}%</td><td class="mono ${d.pnl>=0?'g':'r'}">${d.pnl>=0?'+':''}${cur}${Math.abs(d.pnl).toFixed(2)}</td><td class="mono ${parseFloat(roi)>=0?'g':'r'}">${roi}%</td><td class="mono">${cur}${d.stake.toFixed(2)}</td></tr>`;
+  });
+  document.getElementById('tag-tbl').innerHTML=th+'</tbody></table>';
+  fill2('tag-sel', tags, 'Select tag…');
+}
+function renderTagDet() { const t=document.getElementById('tag-sel').value; document.getElementById('tag-det').innerHTML=t?betTbl(S.bets.filter(b=>(b.tags||[]).includes(t)),false):''; }
+
+// ════════════════════════════════════════
+// ACCOUNT HEALTH
+// ════════════════════════════════════════
+function renderHealth() {
+  const cur=S.settings.currency||'A$', bets=S.bets;
+  const settled=bets.filter(b=>b.pnl!==null);
+  const wins=bets.filter(b=>b.status==='win').length, losses=bets.filter(b=>b.status==='loss').length;
+  const wr=settled.length?(wins/settled.length*100):0;
+  const staked=settled.filter(b=>b.status!=='push'&&b.status!=='void').reduce((a,b)=>a+(b.stake||0),0);
+  const p=settled.reduce((a,b)=>a+(b.pnl||0),0);
+  const roi=staked?(p/staked*100):0;
+  const mug=bets.filter(b=>b.odds&&b.odds<1.5&&b.odds>1.0);
+  const mugR=bets.length?(mug.length/bets.length*100):0;
+  const avgSt=staked&&bets.length?staked/bets.length:0;
+  function hm(label,val,pct,col) {
+    return `<div class="hm-item"><div class="hm-label">${label}</div><div class="hm-val" style="color:${col}">${val}</div>${pct!==null?`<div class="bar-track"><div class="bar-fill" style="width:${Math.min(pct,100)}%;background:${col}"></div></div>`:''}</div>`;
+  }
+  const wC=wr>55?'var(--green)':wr>45?'var(--amber)':'var(--red)';
+  const rC=roi>0?'var(--green)':roi>-5?'var(--amber)':'var(--red)';
+  const mC=mugR<20?'var(--green)':mugR<40?'var(--amber)':'var(--red)';
+  document.getElementById('h-metrics').innerHTML =
+    hm('Win Rate',wr.toFixed(1)+'%',wr,wC) +
+    hm('ROI',roi.toFixed(2)+'%',null,rC) +
+    hm('Mug Bet Rate (odds <1.50)',mugR.toFixed(1)+'%',mugR,mC) +
+    hm('Avg Stake',cur+avgSt.toFixed(2),null,'var(--text2)') +
+    hm('Bonus Bet Count',bets.filter(b=>b.bonus).length+'',null,'var(--amber)');
+
+  const bkM={}; S.bets.forEach(b=>{if(!bkM[b.book])bkM[b.book]={w:0,l:0,bets:0};bkM[b.book].bets++;if(b.status==='win')bkM[b.book].w++;if(b.status==='loss')bkM[b.book].l++;});
+  let brH='';
+  Object.entries(bkM).filter(([,d])=>d.bets>0).sort((a,b)=>b[1].bets-a[1].bets).forEach(([bk,d])=>{
+    const w2=(d.w+d.l)?(d.w/(d.w+d.l)*100):0;
+    const c=w2>55?'var(--green)':w2>45?'var(--amber)':'var(--red)';
+    brH+=`<div class="hm-item"><div class="hm-label">${bk} <span style="color:var(--text3)">(${d.bets} bets)</span></div><div style="display:flex;align-items:center;gap:8px"><div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${Math.min(w2,100)}%;background:${c}"></div></div><span class="mono" style="font-size:12px;color:${c};min-width:40px">${w2.toFixed(1)}%</span></div></div>`;
+  });
+  document.getElementById('h-bkrates').innerHTML = brH||'<div class="empty-state" style="padding:20px"><div class="empty-msg">No bookmaker data yet</div></div>';
+  document.getElementById('h-mug').innerHTML = mug.length ? betTbl(mug, false) : '<div class="empty-state" style="padding:24px"><div class="empty-icon">✅</div><div class="empty-msg">No mug bets tracked. Great job!</div></div>';
+
+  dc('cash'); const ctx=document.getElementById('c-cash'); if(!ctx) return;
+  const byM={}; S.bets.forEach(b=>{if(!b.date)return;const m=b.date.slice(0,7);if(!byM[m])byM[m]=0;byM[m]+=(b.pnl||0);});
+  const lb=Object.keys(byM).sort(), da=lb.map(l=>parseFloat(byM[l].toFixed(2)));
+  if(!lb.length){lb.push('');da.push(0);}
+  CH.cash=new Chart(ctx,{type:'bar',data:{labels:lb,datasets:[{data:da,backgroundColor:da.map(v=>v>=0?'rgba(0,255,135,.75)':'rgba(255,71,87,.75)'),borderRadius:4,borderWidth:0}]},options:{...CD(),plugins:{legend:{display:false}}}});
+}
+
+// ════════════════════════════════════════
+// BONUSES
+// ════════════════════════════════════════
+function openBonusModal() { document.getElementById('ov-bonus').classList.add('open'); }
+function closeBonusModal() { document.getElementById('ov-bonus').classList.remove('open'); }
+document.getElementById('ov-bonus').addEventListener('click', e => { if (e.target.id==='ov-bonus') closeBonusModal(); });
+
+function saveBonus() {
+  const bk = document.getElementById('b-book').value; if (!bk) { alert('Select a bookmaker'); return; }
+  const b = { id:Date.now().toString(36), book:bk, type:document.getElementById('b-type').value, amount:parseFloat(document.getElementById('b-amt').value)||0, expiry:document.getElementById('b-exp').value, notes:document.getElementById('b-notes').value, used:false, date:new Date().toISOString().split('T')[0] };
+  S.bonuses.push(b); sv(); renderBonuses(); closeBonusModal();
+  ['b-amt','b-exp','b-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function delBonus(id) { if(!confirm('Remove?'))return; S.bonuses=S.bonuses.filter(x=>x.id!==id); sv(); renderBonuses(); }
+function togBonus(id) { const b=S.bonuses.find(x=>x.id===id); if(!b)return; b.used=!b.used; sv(); renderBonuses(); }
+
+function renderBonuses() {
+  const cur=S.settings.currency||'A$', tod=new Date().toISOString().split('T')[0];
+  const active=S.bonuses.filter(b=>!b.used), used=S.bonuses.filter(b=>b.used);
+  const totA=active.reduce((a,b)=>a+b.amount,0);
+  const soon=active.filter(b=>b.expiry&&b.expiry<=new Date(Date.now()+7*86400000).toISOString().split('T')[0]).length;
+  document.getElementById('bn-widgets').innerHTML=`
+    <div class="widget"><div class="w-top amber"></div><div class="w-ico">🎁</div><div class="w-lbl">Active Bonuses</div><div class="w-val a">${active.length}</div><div class="w-sub">${cur}${totA.toFixed(2)} total</div></div>
+    <div class="widget"><div class="w-top red"></div><div class="w-ico">⏰</div><div class="w-lbl">Expiring (7d)</div><div class="w-val ${soon>0?'r':'g'}">${soon}</div></div>
+    <div class="widget"><div class="w-top blue"></div><div class="w-ico">✅</div><div class="w-lbl">Used</div><div class="w-val">${used.length}</div></div>
+  `;
+  const grid=document.getElementById('bn-list');
+  if(!S.bonuses.length){grid.innerHTML='<div class="empty-state"><div class="empty-icon">🎁</div><div class="empty-msg">No bonus bets tracked yet.<br>Click + Add Bonus to get started.</div></div>';return;}
+  grid.innerHTML=S.bonuses.map(b=>{
+    const exp=b.expiry&&b.expiry<tod, exps=b.expiry&&!exp&&b.expiry<=new Date(Date.now()+7*86400000).toISOString().split('T')[0];
+    return`<div class="bonus-item">
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:14px">${b.book}</div>
+        <div style="font-size:11px;color:var(--text3)">${b.type}${b.notes?' — '+b.notes:''}</div>
+        ${b.expiry?`<div style="font-size:11px;font-family:var(--mono);margin-top:3px;color:${exp?'var(--red)':exps?'var(--amber)':'var(--text3)'}">${exp?'⚠️ Expired':'Expires'} ${b.expiry}</div>`:''}
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--mono);font-size:16px;color:var(--amber)">${cur}${b.amount.toFixed(2)}</div>
+        <div style="margin-top:7px;display:flex;gap:5px;justify-content:flex-end">
+          <button class="btn btn-ghost btn-xs" onclick="togBonus('${b.id}')">${b.used?'Mark Active':'Mark Used'}</button>
+          <button class="btn btn-red btn-xs" onclick="delBonus('${b.id}')">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  const bb=S.bets.filter(b=>b.bonus);
+  document.getElementById('bn-perf').innerHTML=bb.length?betTbl(bb,false):'<div class="empty-state" style="padding:24px"><div class="empty-icon">🎁</div><div class="empty-msg">No bonus bets in your ledger yet.</div></div>';
+}
+
+// ════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════
+function applyS() {
+  document.getElementById('s-bank').value=S.settings.bankroll||'';
+  document.getElementById('s-unit').value=S.settings.unit||'';
+  document.getElementById('s-cur').value=S.settings.currency||'A$';
+  updSD();
+  updateSyncPanel(!!userBinId);
+  const ae=document.getElementById('active-pin'); if(ae)ae.textContent=userBinId?'Synced':'Offline';
+}
+function saveS() {
+  S.settings.bankroll=parseFloat(document.getElementById('s-bank').value)||0;
+  S.settings.unit=parseFloat(document.getElementById('s-unit').value)||1;
+  S.settings.currency=document.getElementById('s-cur').value||'A$';
+  sv(); updSD(); updateSB();
+  document.getElementById('f-uhint').textContent=`1u = ${S.settings.currency}${S.settings.unit}`;
+}
+function updSD() {
+  const cur=S.settings.currency||'A$', bank=S.settings.bankroll||0;
+  const p=S.bets.filter(b=>b.pnl!==null).reduce((a,b)=>a+(b.pnl||0),0);
+  const staked=S.bets.filter(b=>b.pnl!==null&&b.status!=='push'&&b.status!=='void').reduce((a,b)=>a+(b.stake||0),0);
+  const roi=staked?(p/staked*100):0;
+  document.getElementById('s-st').textContent=cur+bank.toFixed(2);
+  document.getElementById('s-cu').textContent=cur+(bank+p).toFixed(2);
+  const pe=document.getElementById('s-pnl'); pe.textContent=(p>=0?'+':'')+cur+Math.abs(p).toFixed(2); pe.className=p>=0?'g':'r';
+  const re=document.getElementById('s-roi'); re.textContent=roi.toFixed(2)+'%'; re.className=roi>=0?'g':'r';
+}
+function renderChips() {
+  rChip('sp-chips',S.settings.sports,'sports'); rChip('tp-chips',S.settings.types,'types');
+  rChip('cp-chips',S.settings.cappers,'cappers'); rChip('bk-chips',S.settings.books,'books');
+}
+function rChip(elId,items,key) {
+  const el=document.getElementById(elId); if(!el) return;
+  el.innerHTML=items.map((item,i)=>`<div class="chip">${item}<button class="chip-x" onclick="remItem('${key}',${i})">×</button></div>`).join('');
+}
+function addItem(key,inputId) { const v=document.getElementById(inputId).value.trim(); if(!v)return; S.settings[key].push(v); document.getElementById(inputId).value=''; sv(); renderChips(); popAll(); }
+function remItem(key,i) { S.settings[key].splice(i,1); sv(); renderChips(); popAll(); }
+function clearAll() { if(!confirm('⚠️ Delete ALL data permanently?'))return; if(!confirm('Cannot be undone. Continue?'))return; localStorage.removeItem(KEY); location.reload(); }
+
+// ════════════════════════════════════════
+// CSV EXPORT
+// ════════════════════════════════════════
+function exportCSV() {
+  const bets=getFilt();
+  const hd=['Date','Description','Sport','Type','Bookmaker','Capper','Odds','Stake','Units','ToWin','Status','PNL','Tags','Bonus','Notes'];
+  const rows=bets.map(b=>[b.date,`"${b.desc}"`,b.sport,b.type,b.book||'',b.capper||'',b.odds,b.stake,b.units||'',b.towin||'',b.status,b.pnl||'',(b.tags||[]).join(';'),b.bonus||'',`"${(b.notes||'').replace(/"/g,"'")}"`]);
+  const csv=[hd,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='bettrackr_au_export.csv'; a.click();
+}
+
+
+
+
+// ════════════════════════════════════════
+// GO
+// ════════════════════════════════════════
+async function doSyncLoginUI() {
+  const pin = document.getElementById('pin-entry').value.trim();
+  const errEl = document.getElementById('pin-err');
+  const btn = document.getElementById('pin-login-btn');
+  errEl.textContent = '';
+  if (pin.length < 4) { errEl.textContent = 'PIN must be at least 4 characters.'; return; }
+  btn.textContent = '⏳ Connecting…'; btn.disabled = true;
+  try {
+    const res = await doSyncLogin(pin);
+    renderAll(); applyS();
+    updateSyncPanel(true);
+    setSyncStatus('ok');
+    const disp = document.getElementById('active-pin-display');
+    if (disp) disp.textContent = '●'.repeat(Math.min(pin.length, 8)) + ' (PIN set)';
+    document.getElementById('pin-entry').value = '';
+  } catch(e) {
+    errEl.textContent = e.message || 'Connection failed. Check your internet.';
+    setSyncStatus('err');
+  }
+  btn.textContent = '🔐 Connect'; btn.disabled = false;
+}
+
+// Also fix applyS to update sync panel state
+const _origApplyS = applyS;
+
+init();
+</script>
+</div><!-- /app-shell -->
+</body>
+</html>
